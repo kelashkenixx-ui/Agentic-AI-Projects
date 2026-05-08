@@ -1,0 +1,184 @@
+import json
+
+# ---------------------- FUNCTIONS ---------------------- #
+
+def get_weather(city):
+    data = {
+        "Karachi": "35°C Sunny",
+        "Lahore": "30°C Cloudy",
+        "Islamabad": "28°C Rainy"
+    }
+
+    return data.get(city, "City not found")
+
+
+def calculator(a, b, operation):
+    try:
+        if operation == "add":
+            return a + b
+
+        elif operation == "subtract":
+            return a - b
+
+        elif operation == "multiply":
+            return a * b
+
+        elif operation == "divide":
+            return a / b
+
+        else:
+            return "Invalid operation"
+
+    except Exception as e:
+        return str(e)
+
+
+# ---------------------- AI AGENT ---------------------- #
+
+def ai_agent(user_input):
+
+    try:
+        # Weather Function Calling
+        if "weather" in user_input.lower():
+
+            city = user_input.split()[-1]
+
+            result = get_weather(city)
+
+            response = {
+                "tool_called": "get_weather",
+                "city": city,
+                "result": result,
+                "status": "success"
+            }
+
+            return json.dumps(response, indent=4)
+
+        # Calculator Function Calling
+        elif "calculate" in user_input.lower():
+
+            parts = user_input.split()
+
+            a = float(parts[1])
+            operation = parts[2]
+            b = float(parts[3])
+
+            result = calculator(a, b, operation)
+
+            response = {
+                "tool_called": "calculator",
+                "inputs": [a, b],
+                "operation": operation,
+                "result": result,
+                "status": "success"
+            }
+
+            return json.dumps(response, indent=4)
+
+        else:
+            return json.dumps({
+                "status": "error",
+                "message": "Unknown command"
+            }, indent=4)
+
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "message": str(e)
+        }, indent=4)
+
+
+# ---------------------- TESTING ---------------------- #
+
+import json
+
+# ---------------- MEMORY ---------------- #
+
+history = []
+
+# ---------------- CALCULATOR ---------------- #
+
+def calculate(a, b, operation):
+
+    try:
+
+        if operation == "+":
+            result = a + b
+
+        elif operation == "-":
+            result = a - b
+
+        elif operation == "*":
+            result = a * b
+
+        elif operation == "/":
+            result = a / b
+
+        else:
+            return {
+                "status": "error",
+                "message": "Invalid operation"
+            }
+
+        # Save to memory
+        history.append({
+            "a": a,
+            "b": b,
+            "operation": operation,
+            "result": result
+        })
+
+        return {
+            "status": "success",
+            "result": result,
+            "memory": history
+        }
+
+    except Exception as e:
+
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+# ---------------- USER INPUT ---------------- #
+
+while True:
+
+    print("\nAI Calculator Agent")
+
+    print("1. Calculate")
+    print("2. Show Memory")
+    print("3. Exit")
+
+    choice = input("Enter choice: ")
+
+    if choice == "1":
+
+        try:
+            a = float(input("Enter first number: "))
+            operation = input("Enter operation (+,-,*,/): ")
+            b = float(input("Enter second number: "))
+
+            response = calculate(a, b, operation)
+
+            print(json.dumps(response, indent=4))
+
+        except:
+            print("Invalid Input")
+
+    elif choice == "2":
+
+        print(json.dumps(history, indent=4))
+
+    elif choice == "3":
+
+        print("Exiting...")
+        break
+
+    else:
+        print("Invalid Choice")
+
+print(ai_agent("weather Karachi"))
+
+print(ai_agent("calculate 10 add 5"))
